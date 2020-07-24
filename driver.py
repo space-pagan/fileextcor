@@ -2,9 +2,10 @@
 import os
 
 def main():
-    print("File Extension Corrector v0.0.1\n")
+    print("File Extension Corrector v0.0.2\n")
     dir = runoptions()
     scanfiles(dir)
+    input("Press ENTER to close the program...")
 
 def runoptions():
     cd = os.getcwd()
