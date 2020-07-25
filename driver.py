@@ -3,8 +3,10 @@ import os
 
 def main():
     print("File Extension Corrector v0.0.2\n")
-    dir = setup()
-    scanfiles(dir)
+    dir, printSkipped = setup()
+    skippedFiles = scanfiles(dir)
+    if printSkipped:
+        printSkippedList(skippedFiles)
     pauseandquit()
 
 def setup():
@@ -12,13 +14,26 @@ def setup():
     print("The current directory is " + cd)
     inputstr = input("Is this the directory you wish to scan for file extension issues? (Y/N): ").lower()
     if inputstr == "y":
-        return cd
-    if inputstr == "n":
+        pass
+    elif inputstr == "n":
         cd = input("Please input the absolute path to the directory to be scanned:\n")
         print("Scan directory set to " + cd)
-        return cd
-    print("Unknown option. Terminating.")
-    pauseandquit()
+    else:
+        print("Unknown option. Terminating.")
+        pauseandquit()
+    inputstr = input("Would you like a list of skipped files to be printed after processing? (Y/N): ").lower()
+    if inputstr == "y":
+        return cd, True
+    elif inputstr == "n":
+        return cd, False
+    else:
+        print("Unknown option. Terminating.")
+        pauseandquit()
+
+def printSkippedList(skippedFiles):
+    print("\n{} files skipped (not JPG/PNG/GIF):".format(len(skippedFiles)))
+    for f in skippedFiles:
+        print(f)
 
 def pauseandquit():
     try:
@@ -28,8 +43,11 @@ def pauseandquit():
     exit()
 
 def scanfiles(dir):
+    skippedFiles = []
     for file in os.scandir(dir):
-        processFile(file)
+        if notNoneIfSkipped := processFile(file):
+            skippedFiles.append(notNoneIfSkipped)
+    return skippedFiles
 
 def processFile(file):
     if file.is_file():
@@ -39,6 +57,8 @@ def processFile(file):
         f.close()
         if newext:
             renameFileToHaveExtension(file, newext)
+        else:
+            return file.name
 
 def renameFileToHaveExtension(file, newext):
     curext, newpath = getCurrentExtensionAndNewPath(file, newext)
